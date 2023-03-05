@@ -35,6 +35,8 @@ header=["Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gec
 res=re.search("语音key=(.*?)\\n",str(res)).group(1)
 res1=input("跳过日文语音？(Y/N[default])：")
 res3=input("是否方言？(Y/N[default])：")
+res4=input("是否获取韩文语音？(Y/N[default])：")
+res5=input("是否获取英文语音？(Y/N[default])：")
 if res3!="Y" and res3!="y":
     res2=input("特殊语音key：")
 else:
@@ -54,26 +56,27 @@ pinyin="".join(pinyin)
 pinyin_=input("确认干员名称拼音（与预期不一致时输入拼音）：" + pinyin + " ")
 if pinyin_:
     pinyin=pinyin_
+langdict={"中文":"_cn", "英文":"_en", "韩文":"_kr", "日文":""}
 def download(lang:str,kind="",res=res):
-    zh="_zh" if lang=="中文" else ""
-    cn="_cn" if lang=="中文" else ""
+    zh="_zh" if lang=="中文" else langdict[lang]
+    lan=langdict[lang]
     custom="_custom" if lang=="方言" else ""
     if kind and lang!="方言":
         zh="_skin1"+zh
     elif kind and lang=="方言":
         zh="_fy"+zh
-    os.mkdir(workdir+"\\"+op+"\\"+kind+lang+"语音") if not os.path.exists(workdir+"\\"+op+"\\"+kind+lang+"语音") else print(""+kind+lang+"语音目录已存在！")
+    os.mkdir(workdir+"\\"+op+"\\") if not os.path.exists(workdir+"\\"+op+"\\") else print(op+"语音目录已存在！")
     pbar=tqdm(id,unit="file")
     for key in pbar:
         filename=pinyin+zh+"_CN_"+id[key]+".wav"
-        if not os.path.exists(workdir+"\\"+op+"\\"+kind+lang+"语音\\"+filename.rstrip("wav")+"mp3"):
+        if not os.path.exists(workdir+"\\"+op+"\\"+filename.rstrip("wav")+"mp3"):
             pbar.set_description("正在获取"+filename.rstrip("wav")+"mp3...")
-            response=requests.get("https://static.prts.wiki/voice"+cn+custom+"/"+res+"/"+"CN_"+id[key]+".wav",headers={'User-Agent': random.choice(header), 'Referer':"https://prts.wiki/w/"+urllib.parse.quote(op)+r"/%E8%AF%AD%E9%9F%B3%E8%AE%B0%E5%BD%95"})
+            response=requests.get("https://static.prts.wiki/voice"+lan+custom+"/"+res+"/"+"CN_"+id[key]+".wav",headers={'User-Agent': random.choice(header), 'Referer':"https://prts.wiki/w/"+urllib.parse.quote(op)+r"/%E8%AF%AD%E9%9F%B3%E8%AE%B0%E5%BD%95"})
             with open(workdir+"\\temp\\"+filename,"wb") as f:
                 f.write(response.content)
             try:
                 mp3=AudioSegment.from_wav(workdir+"\\temp\\"+filename)
-                mp3.export(workdir+"\\"+op+"\\"+kind+lang+"语音\\"+filename.rstrip("wav")+"mp3",format="mp3",bitrate="320k")
+                mp3.export(workdir+"\\"+op+"\\"+filename.rstrip("wav")+"mp3",format="mp3",bitrate="320k")
             except(FileNotFoundError):
                 print("未找到文件" + res+"/"+"CN_"+id[key]+".wav")
             os.remove(workdir+"\\temp\\"+filename)
@@ -86,9 +89,13 @@ if res1!="Y" and res1!="y":
     download("日文")
 download("中文")
 if res2 and res3!="Y" and res3!="y":
-    download("日文",kind="特殊",res=res2)
-    download("中文",kind="特殊",res=res2)
+    download("日文",res=res2)
+    download("中文",res=res2)
 if res3=="Y" or res3=="y":
     download("方言",kind="特殊",res=res2)
-os.rmdir(workdir+"\\temp\\")
+if res4=="Y" or res4=="y":
+    download("韩文")
+if res4=="Y" or res4=="y":
+    download("英文")
+# os.rmdir(workdir+"\\temp\\")
 input("\n\n按下回车关闭窗口")
