@@ -33,12 +33,24 @@ header=["Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gec
         "Mozilla/5.0 (X11; Linux i686) AppleWebKit/535.7 (KHTML, like Gecko) Ubuntu/11.04 Chromium/16.0.912.77 Chrome/16.0.912.77 Safari/535.7",
         "Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:10.0) Gecko/20100101 Firefox/10.0 "]
 res=re.search("语音key=(.*?)\\n",str(res)).group(1)
-res1=input("跳过日文语音？(Y/N[default])：")
-res3=input("是否方言？(Y/N[default])：")
-res4=input("是否获取韩文语音？(Y/N[default])：")
-res5=input("是否获取英文语音？(Y/N[default])：")
+res1="N"  # 跳过日文语音？(Y/N[default])
+res3="N"  # 是否方言？(Y/N[default])
+res4="Y"  # 是否获取韩文语音？(Y[default]/N)
+res5="Y"  # 是否获取英文语音？(Y[default]/N)
+print("即将获取 "+op+" 的中文语音")
+if res1 == "N" or res1 == "n":
+    print("即将获取 "+op+" 的日文语音")
+if res3 == "Y" or res3 == "y":
+    print("即将获取 "+op+" 的方言语音")
+if res4 == "Y" or res4 == "y":
+    print("即将获取 "+op+" 的韩文语音")
+if res5 == "Y" or res5 == "y":
+    print("即将获取 "+op+" 的英文语音")
+
 if res3!="Y" and res3!="y":
     res2=input("特殊语音key：")
+    if res2 is not None:
+        print("即将获取 "+op+" 的 "+res2+" 语音")
 else:
     res2=res+"_cn_topolect"
 id={'任命助理':'001','交谈1':'002','交谈2':'003','交谈3':'004','晋升后交谈1':'005','晋升后交谈2':'006','信赖提升后交谈1':'007','信赖提升后交谈2':'008','信赖提升后交谈3':'009','闲置':'010','干员报到':'011','观看作战记录':'012','精英化晋升1':'013','精英化晋升2':'014','编入队伍':'017','任命队长':'018','行动出发':'019','行动开始':'020','选中干员1':'021','选中干员2':'022','部署1':'023','部署2':'024','作战中1':'025','作战中2':'026','作战中3':'027','作战中4':'028','完成高难行动':'029','3星结束行动':'030','非3星结束行动':'031','行动失败':'032','进驻设施':'033','戳一下':'034','信赖触摸':'036','标题':'037','问候':'042'}
@@ -72,14 +84,14 @@ def download(lang:str,kind="",res=res):
         if os.path.exists(workdir + "\\" + op + "\\" + filename):
             if os.stat(workdir + "\\" + op + "\\" + filename).st_size <= 1024:
                 # os.remove(workdir+"\\"+op+"\\"+filename)
-                print(filename+"可能为损坏文件，如该干员无本条语音请忽略")
+                print("\n"+filename+"可能为损坏文件，如该干员无本条语音请忽略")
                 # exit(1)
         if not os.path.exists(workdir+"\\"+op+"\\"+filename):
             pbar.set_description("正在获取"+filename+"...")
             response=requests.get("https://static.prts.wiki/voice"+lan+custom+"/"+res+"/"+"CN_"+id[key]+".wav",headers={'User-Agent': random.choice(header), 'Referer':"https://prts.wiki/w/"+urllib.parse.quote(op)+r"/%E8%AF%AD%E9%9F%B3%E8%AE%B0%E5%BD%95"})
             if response.content.__sizeof__() <= 1024:
                 # os.remove(workdir+"\\"+op+"\\"+filename)
-                print("获取"+filename+"时可能遇到了网络错误，如该干员无本条语音请忽略")
+                print("\n获取"+filename+"时可能遇到了网络错误，如该干员无本条语音请忽略")
             else:
                 with open(workdir + "\\" + op + "\\" + filename, "wb") as f:
                     f.write(response.content)
