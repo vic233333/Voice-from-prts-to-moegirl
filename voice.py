@@ -49,7 +49,7 @@ if res5 == "Y" or res5 == "y":
 
 if res3!="Y" and res3!="y":
     res2=input("特殊语音key：")
-    if res2 is not None:
+    if res2 != "":
         print("即将获取 "+op+" 的 "+res2+" 语音")
 else:
     res2=res+"_cn_topolect"
