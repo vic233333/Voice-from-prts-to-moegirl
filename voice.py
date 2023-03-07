@@ -69,21 +69,31 @@ def download(lang:str,kind="",res=res):
     pbar=tqdm(id,unit="file")
     for key in pbar:
         filename=pinyin+zh+"_CN_"+id[key]+".wav"
-        if not os.path.exists(workdir+"\\"+op+"\\"+filename.rstrip("wav")+"mp3"):
-            pbar.set_description("正在获取"+filename.rstrip("wav")+"mp3...")
+        if os.path.exists(workdir + "\\" + op + "\\" + filename):
+            if os.stat(workdir + "\\" + op + "\\" + filename).st_size <= 128:
+                # os.remove(workdir+"\\"+op+"\\"+filename)
+                print("检测到有损坏文件，请手动移除")
+                # exit(1)
+        if not os.path.exists(workdir+"\\"+op+"\\"+filename):
+            pbar.set_description("正在获取"+filename+"...")
             response=requests.get("https://static.prts.wiki/voice"+lan+custom+"/"+res+"/"+"CN_"+id[key]+".wav",headers={'User-Agent': random.choice(header), 'Referer':"https://prts.wiki/w/"+urllib.parse.quote(op)+r"/%E8%AF%AD%E9%9F%B3%E8%AE%B0%E5%BD%95"})
-            with open(workdir+"\\temp\\"+filename,"wb") as f:
-                f.write(response.content)
-            try:
-                mp3=AudioSegment.from_wav(workdir+"\\temp\\"+filename)  # 如果报错请检查44行是否包含该干员没有的语言
-                mp3.export(workdir+"\\"+op+"\\"+filename.rstrip("wav")+"mp3",format="mp3",bitrate="320k")
-            except(FileNotFoundError):
-                print("未找到文件" + res+"/"+"CN_"+id[key]+".wav")
-            os.remove(workdir+"\\temp\\"+filename)
-            #pbar.set_description(filename.rstrip("wav")+"mp3已获取完成！")
-            #sleep(0.2)
+            if response.content.__sizeof__() <= 128:
+                # os.remove(workdir+"\\"+op+"\\"+filename)
+                print("网络错误，请稍后重试")
+                exit(1)
+            else:
+                with open(workdir + "\\" + op + "\\" + filename, "wb") as f:
+                    f.write(response.content)
+            # try:
+            #     mp3=AudioSegment.from_wav(workdir+"\\temp\\"+filename)  # 如果报错请检查44行是否包含该干员没有的语言
+            #     mp3.export(workdir+"\\"+op+"\\"+filename.rstrip("wav")+"mp3",format="mp3",bitrate="320k")
+            # except(FileNotFoundError):
+            #     print("未找到文件" + res+"/"+"CN_"+id[key]+".wav")
+            # os.remove(workdir+"\\temp\\"+filename)
+            #pbar.set_description(filename.rstrip("wav")+"wav已获取完成！")
+            # sleep(0.2)  # 去除这个sleep可能会导致经常性网络问题
         else:
-            pbar.set_description(filename.rstrip("wav")+"mp3已存在!")
+            pbar.set_description(filename+"已存在!")
         sleep(0.05)
 if res1!="Y" and res1!="y":
     download("日文")
